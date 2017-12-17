@@ -44,11 +44,9 @@ public class Runner {
 
         Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<Map<String, Integer>, Map<String, Integer>, Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> apply(Map<String, Integer> stringIntegerHashMap, Map<String, Integer> o) throws Exception {
-                Map<String, Integer> frequencies = (Map<String, Integer>) o;
-                stringIntegerHashMap.putAll(frequencies);
-
-                return stringIntegerHashMap;
+            public Map<String, Integer> apply(Map<String, Integer> allFrequencies, Map<String, Integer> frequencies) throws Exception {
+                allFrequencies.putAll(frequencies);
+                return allFrequencies;
             }
         }, executionContext);
 
