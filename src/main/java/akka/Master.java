@@ -42,7 +42,7 @@ public class Master extends UntypedActor {
                 .collect(Collectors.toList());
 
         Future<Map<String, Long>> fold = Futures.fold(new HashMap<>(), futures, (allFrequencies, frequencies) -> {
-            allFrequencies.putAll(frequencies);
+            frequencies.forEach((k, v) -> allFrequencies.merge(k, v, Long::sum));
             return allFrequencies;
         }, executionContext);
 
