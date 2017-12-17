@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
-import akka.japi.Function2;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import scala.concurrent.Await;
@@ -42,12 +41,9 @@ public class Runner {
                 .collect(Collectors.toList());
 
 
-        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<Map<String, Integer>, Map<String, Integer>, Map<String, Integer>>() {
-            @Override
-            public Map<String, Integer> apply(Map<String, Integer> allFrequencies, Map<String, Integer> frequencies) throws Exception {
-                allFrequencies.putAll(frequencies);
-                return allFrequencies;
-            }
+        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, (allFrequencies, frequencies) -> {
+            allFrequencies.putAll(frequencies);
+            return allFrequencies;
         }, executionContext);
 
         Map<String, Integer> result = Await.result(fold, timeout.duration());
