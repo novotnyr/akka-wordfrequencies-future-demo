@@ -3,20 +3,15 @@ package akka;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.dispatch.Futures;
+import akka.dispatch.OnSuccess;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.ExecutionContext;
+import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
-import scala.reflect.ClassTag$;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class Runner {
     public static void main(String[] args) throws Exception {
@@ -29,25 +24,18 @@ public class Runner {
         );
 
         ActorSystem system = ActorSystem.create();
-        ActorRef sentenceCounter = system.actorOf(Props.create(SentenceCountActor.class));
+        ActorRef master = system.actorOf(Props.create(Master.class));
 
         Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
-        ExecutionContext executionContext = system.dispatcher();
+        ExecutionContextExecutor executionContext = system.dispatcher();
 
-        List<Future<Map<String, Integer>>> futures = sentences
-                .stream()
-                .map(sentence -> Patterns.ask(sentenceCounter, sentence, timeout))
-                .map(f -> f.mapTo(ClassTag$.MODULE$.<Map<String, Integer>>apply(Map.class)))
-                .collect(Collectors.toList());
-
-
-        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, (allFrequencies, frequencies) -> {
-            allFrequencies.putAll(frequencies);
-            return allFrequencies;
+        Future<Object> future = Patterns.ask(master, sentences, timeout);
+        future.onSuccess(new OnSuccess<Object>() {
+            @Override
+            public void onSuccess(Object o) throws Throwable {
+                System.out.println(o);
+            }
         }, executionContext);
-
-        Map<String, Integer> result = Await.result(fold, timeout.duration());
-        System.out.println(result);
 
     }
 }
