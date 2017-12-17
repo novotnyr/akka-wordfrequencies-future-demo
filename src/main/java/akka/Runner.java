@@ -39,9 +39,9 @@ public class Runner {
                 .map(sentence -> Patterns.ask(sentenceCounter, sentence, timeout))
                 .collect(Collectors.toList());
 
-        Future<HashMap<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<HashMap<String, Integer>, Object, HashMap<String, Integer>>() {
+        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<Map<String, Integer>, Object, Map<String, Integer>>() {
             @Override
-            public HashMap<String, Integer> apply(HashMap<String, Integer> stringIntegerHashMap, Object o) throws Exception {
+            public Map<String, Integer> apply(Map<String, Integer> stringIntegerHashMap, Object o) throws Exception {
                 Map<String, Integer> frequencies = (Map<String, Integer>) o;
                 stringIntegerHashMap.putAll(frequencies);
 
@@ -49,7 +49,7 @@ public class Runner {
             }
         }, executionContext);
 
-        HashMap<String, Integer> result = Await.result(fold, timeout.duration());
+        Map<String, Integer> result = Await.result(fold, timeout.duration());
         System.out.println(result);
 
     }
