@@ -10,6 +10,7 @@ import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
+import scala.reflect.ClassTag$;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,14 +35,16 @@ public class Runner {
         Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
         ExecutionContext executionContext = system.dispatcher();
 
-        List<Future<Object>> futures = sentences
+        List<Future<Map<String, Integer>>> futures = sentences
                 .stream()
                 .map(sentence -> Patterns.ask(sentenceCounter, sentence, timeout))
+                .map(f -> f.mapTo(ClassTag$.MODULE$.<Map<String, Integer>>apply(Map.class)))
                 .collect(Collectors.toList());
 
-        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<Map<String, Integer>, Object, Map<String, Integer>>() {
+
+        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<Map<String, Integer>, Map<String, Integer>, Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> apply(Map<String, Integer> stringIntegerHashMap, Object o) throws Exception {
+            public Map<String, Integer> apply(Map<String, Integer> stringIntegerHashMap, Map<String, Integer> o) throws Exception {
                 Map<String, Integer> frequencies = (Map<String, Integer>) o;
                 stringIntegerHashMap.putAll(frequencies);
 
