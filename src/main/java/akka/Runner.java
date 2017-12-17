@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Runner {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         List<String> sentences = Arrays.asList(
             "The quick brown fox tried to jump over the lazy dog and fell on the dog",
             "Dog is man's best friend",
@@ -32,7 +32,7 @@ public class Runner {
         Future<Object> future = Patterns.ask(master, sentences, timeout);
         future.onSuccess(new OnSuccess<Object>() {
             @Override
-            public void onSuccess(Object o) throws Throwable {
+            public void onSuccess(Object o) {
                 System.out.println(o);
             }
         }, executionContext);

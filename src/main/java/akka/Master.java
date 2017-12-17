@@ -35,13 +35,13 @@ public class Master extends UntypedActor {
     private void handleSentences(List<String> sentences) {
         ExecutionContext executionContext = getContext().dispatcher();
 
-        List<Future<Map<String, Integer>>> futures = sentences
+        List<Future<Map<String, Long>>> futures = sentences
                 .stream()
                 .map(sentence -> Patterns.ask(sentenceCounter, sentence, timeout))
-                .map(f -> f.mapTo(ClassTag$.MODULE$.<Map<String, Integer>>apply(Map.class)))
+                .map(f -> f.mapTo(ClassTag$.MODULE$.<Map<String, Long>>apply(Map.class)))
                 .collect(Collectors.toList());
 
-        Future<Map<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, (allFrequencies, frequencies) -> {
+        Future<Map<String, Long>> fold = Futures.fold(new HashMap<>(), futures, (allFrequencies, frequencies) -> {
             allFrequencies.putAll(frequencies);
             return allFrequencies;
         }, executionContext);
