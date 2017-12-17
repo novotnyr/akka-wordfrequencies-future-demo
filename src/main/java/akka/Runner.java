@@ -10,10 +10,10 @@ import scala.concurrent.Await;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Runner {
     public static void main(String[] args) throws Exception {
@@ -31,11 +31,10 @@ public class Runner {
         Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
         ExecutionContext executionContext = system.dispatcher();
 
-        List<Future<Object>> futures = new ArrayList<>();
-        for (String sentence : sentences) {
-            Future<Object> ask = Patterns.ask(sentenceCounter, sentence, timeout);
-            futures.add(ask);
-        }
+        List<Future<Object>> futures = sentences
+                .stream()
+                .map(sentence -> Patterns.ask(sentenceCounter, sentence, timeout))
+                .collect(Collectors.toList());
 
         Future<Iterable<Object>> sequence = Futures.sequence(futures, executionContext);
         Object result = Await.result(sequence, timeout.duration());
