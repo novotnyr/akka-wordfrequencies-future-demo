@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import akka.japi.Function2;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import scala.concurrent.Await;
@@ -11,7 +12,9 @@ import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -36,8 +39,17 @@ public class Runner {
                 .map(sentence -> Patterns.ask(sentenceCounter, sentence, timeout))
                 .collect(Collectors.toList());
 
-        Future<Iterable<Object>> sequence = Futures.sequence(futures, executionContext);
-        Object result = Await.result(sequence, timeout.duration());
+        Future<HashMap<String, Integer>> fold = Futures.fold(new HashMap<>(), futures, new Function2<HashMap<String, Integer>, Object, HashMap<String, Integer>>() {
+            @Override
+            public HashMap<String, Integer> apply(HashMap<String, Integer> stringIntegerHashMap, Object o) throws Exception {
+                Map<String, Integer> frequencies = (Map<String, Integer>) o;
+                stringIntegerHashMap.putAll(frequencies);
+
+                return stringIntegerHashMap;
+            }
+        }, executionContext);
+
+        HashMap<String, Integer> result = Await.result(fold, timeout.duration());
         System.out.println(result);
 
     }
