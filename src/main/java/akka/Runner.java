@@ -34,8 +34,11 @@ public class Runner {
             @Override
             public void onSuccess(Object o) {
                 System.out.println(o);
+
+                system.terminate();
             }
         }, executionContext);
+
 
     }
 }
